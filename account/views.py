@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect
 from .models import Customer
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password,check_password
 
 
 
@@ -33,18 +33,15 @@ def signup(request):
                                 mobile_no = mobile_no,
                                 create_password=create_password
                                 )
-            if Customer.objects.get(email = email):
-                return render(request,'singup.html',{'error':"email is present"})
-
-
-            else:
-                customer.create_password = make_password(create_password)
-                customer.save()
-
+            customer.create_password = make_password(create_password)
+            customer.save()
             return redirect('login')
         
         else:
-            return render(request,'singup.html',{'error':error})
+            data = {
+                "error":error
+            }
+            return render(request,'singup.html',data)
 
 
 def login(request):
@@ -55,13 +52,20 @@ def login(request):
         data = request.POST
         email = data.get('email')
         password = data.get('password')
-        customer = Customer.objects.filter(email=email,create_password=password).count()
+        print(email)
+        print(password)
+        customer = Customer.get_customer_by_email(email)
         print(customer)
-        if customer>0:
-            request.session['login'] = True
-            return redirect('index')
+        error_message = None
+        if customer:
+            flag = check_password(password,customer.create_password)
+            if flag:
+                return redirect('index')
+            else:
+                error_message = "email & password invalid"
         else:
-            return render(request,'login.html')
+            error_message = "email & password invalid"
+        return render(request,'login.html', {'error_message':error_message})
         
 
 def logout(request):

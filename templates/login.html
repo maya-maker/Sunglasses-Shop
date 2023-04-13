@@ -51,6 +51,7 @@
 	<h4 class="card-title mt-3 text-center">Login Account</h4>
 	<form method="post">
         {% csrf_token %}
+        {{error_message}}
     <div class="form-group input-group">
     	<div class="input-group-prepend">
 		    <span class="input-group-text"> <i class="fa fa-envelope"></i> </span>
