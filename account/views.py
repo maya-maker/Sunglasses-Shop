@@ -60,6 +60,9 @@ def login(request):
         if customer:
             flag = check_password(password,customer.create_password)
             if flag:
+                request.session['customer']= customer.id
+                request.session['email']= customer.email
+
                 return redirect('index')
             else:
                 error_message = "email & password invalid"
@@ -69,6 +72,6 @@ def login(request):
         
 
 def logout(request):
-    del request.session['login']
-    return redirect('login')
+    del request.session['customer']
+    return redirect('index')
             

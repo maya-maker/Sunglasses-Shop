@@ -21,6 +21,7 @@ def index(request):
     data['product_count'] = product_count
     data['categories'] = category
     data['products']=product
+    print(request.session.get('email'))
     return render(request,"shop-grid.html",data)
 
 def cart(request):
@@ -76,14 +77,19 @@ def update_cart_item(request, id):
 
 
 def chekout(request):
-    cart = request.session.get('cart', {})
-    cart_items = []
-    cart_total = 0
-    for id, cart_item in cart.items():
-        product = get_object_or_404(Product, id=id)
-        cart_item['product'] = product
-        cart_items.append(cart_item)
-        cart_total += cart_item['price']
-    print(cart_items)
-    context = {'cart_items':cart_items}    
-    return render(request,'checkout.html',context)
+    customer = request.session.get('customer')
+    print(customer)
+    if customer:
+        cart = request.session.get('cart', {})
+        cart_items = []
+        cart_total = 0
+        for id, cart_item in cart.items():
+            product = get_object_or_404(Product, id=id)
+            cart_item['product'] = product
+            cart_items.append(cart_item)
+            cart_total += cart_item['price']
+        cart_total_tax = cart_total+(cart_total*18)/100
+        context = {'cart_items':cart_items,'subtotal':cart_total,"total":cart_total_tax}    
+        return render(request,'checkout.html',context)
+    else:
+        return redirect('cart')
